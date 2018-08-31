@@ -6,7 +6,9 @@
 
 class Machine;
 typedef std::unique_ptr<IOperand> operandPtr;
-typedef std::map<std::string, void(Machine::*)()> singleFunctionMap_mt;
+typedef void(Machine::*fPtr)();
+typedef std::map<std::string, fPtr> singleFunctionMap_mt;
+//typedef std::map<std::string, void(Machine::*)()> singleFunctionMap_mt;
 typedef std::map<std::string, void(Machine::*)(std::string)> doubleFunctionMap_mt;
 
 class Machine

@@ -1,9 +1,38 @@
 #include "machine.hpp"
 
+#define OPERATION_FUNCTION_PATTERN(operation) 									\
+	if (_operands.size() < 2)		    										\
+		throw Machine::Error("The stack is composed of strictly	less that two " \
+					   "values when an arithmetic instruction is executed");	\
+	try																			\
+	{																			\
+		auto i = _operands.size();												\
+		auto first = _operands.at(i - 2).get();									\
+		auto second = _operands.at(i - 1).get();								\
+		operandPtr result(*first operation *second);							\
+		_operands.pop_back();													\
+		_operands.pop_back();													\
+		_operands.push_back(std::move(result)); 								\
+	}																			\
+	catch (std::exception &e)													\
+	{																			\
+			std::cout << "ERROR: " << e.what() << std::endl;					\
+	}
 
+#define CREATE_OPERAND_PATTERN(type)   					 \
+	IOperand *new_element = NULL;						 \
+	try													 \
+	{													 \
+		new_element = new Operand(type, value);		 	 \
+	}													 \
+	catch (std::exception &e)							 \
+	{													 \
+		std::cout << "ERROR: " << e.what() << std::endl; \
+	}													 \
+	return(new_element);
 
-namespace {
-
+namespace
+{
 	std::vector<std::string> ft_split(std::string str) {
 		std::string buf;
 		std::vector<std::string> command;
@@ -67,52 +96,50 @@ void	Machine::run(std::string command)
 
 	_command = command;
 	std::vector<std::string> split_command = ft_split(command);
-
 	if (split_command.size() == 0)
 	{
 		return;
 	}
-	for (auto i = _doubleCallOption.begin(); i != _doubleCallOption.end(); ++i)
+
+	auto i = _singleCallOption.find(split_command[0]);
+	if (i != _singleCallOption.end() && split_command.size() == 1)
 	{
-		if (split_command[0] == i->first && split_command.size() == 2)
+		try
 		{
-			try
-			{
-				i->second()(split_command[1]);
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-			return;
+			(this->*i->second)();
 		}
+		catch (std::exception &e)
+		{
+			std::cout << "ERROR: " << e.what() << std::endl;
+		}
+		return;
 	}
-	for (auto i = _singleCallOption.begin(); i != _singleCallOption.end(); ++i)
+
+	auto j = _doubleCallOption.find(split_command[0]);
+	if (j != _doubleCallOption.end() && split_command.size() == 2)
 	{
-		if (split_command[0] == i->first && split_command.size() == 1)
+		try
 		{
-			try
-			{
-				i->second();
- 			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-			return;
+			(this->*j->second)(split_command[1]);
 		}
+		catch (std::exception &e)
+		{
+			std::cout << "ERROR: " << e.what() << std::endl;
+		}
+		return;
 	}
+
 	if (split_command[0] == "exit" && split_command.size() == 1)
 		_exit = true;
 	else
 		throw Machine::Error("!" + command + "!:" + "An instruction is unknown");
 }
 
-/********************************************************************/
+
 
 void			Machine::push(std::string command)
 {
-	Type 		set_type;
+	Type set_type;
 	try
 	{
 		set_type.set_param(command);
@@ -135,17 +162,14 @@ void			Machine::dump()
 {
 	if (_operands.size() == 0)
 		throw Machine::Error("Instruction dump on an empty stack");
-	else
-	{
-		auto iter = _operands.size();
-		while(iter > 0)
-			std::cout << _operands[--iter]->toString() << std::endl;
-	}
+	auto iter = _operands.size();
+	while(iter > 0)
+		std::cout << _operands[--iter]->toString() << std::endl;
 }
 
 void			Machine::assert(std::string command)
 {
-	Type 	assert_type;
+	Type assert_type;
 	if (_operands.size() == 0)
 		throw Machine::Error("Instruction assert on an empty stack");
 	try
@@ -164,102 +188,27 @@ void			Machine::assert(std::string command)
 
 void			Machine::add()
 {
-	if (_operands.size() < 2)
-		throw Machine::Error("The stack is composed of strictly less that two values when an arithmetic instruction is executed");
-	try
-	{
-		auto i = _operands.size();
-		auto first = _operands.at(i - 2).get();
-		auto second = _operands.at(i - 1).get();
-		operandPtr result(*first + *second);
-		_operands.pop_back();
-		_operands.pop_back();
-		_operands.push_back(std::move(result)); 
-	}
-	catch (std::exception &e)
-	{
-			std::cout << "ERROR: " << e.what() << std::endl;
-	}
+	OPERATION_FUNCTION_PATTERN(+)
 }
 
 void			Machine::sub()
 {
-	if (_operands.size() < 2)
-		throw Machine::Error("The stack is composed of strictly less that two values when an arithmetic instruction is executed");
-	try
-	{
-		auto i = _operands.size();
-		auto first = _operands.at(i - 2).get();
-		auto second = _operands.at(i - 1).get();
-		operandPtr result(*first - *second);
-		_operands.pop_back();
-		_operands.pop_back();
-		_operands.push_back(std::move(result));
-	}
-	catch (std::exception &e)
-	{
-			std::cout << "ERROR: " << e.what() << std::endl;
-	}
+	OPERATION_FUNCTION_PATTERN(-)
 }
 
 void			Machine::mul()
 {
-	if (_operands.size() < 2)
-		throw Machine::Error("The stack is composed of strictly less that two values when an arithmetic instruction is executed");
-	try
-	{
-		auto i = _operands.size();
-		auto first = _operands.at(i - 2).get();
-		auto second = _operands.at(i - 1).get();
-		operandPtr result(*first * *second);
-		_operands.pop_back();
-		_operands.pop_back();
-		_operands.push_back(std::move(result));
-	}
-	catch (std::exception &e)
-	{
-			std::cout << "ERROR: " << e.what() << std::endl;
-	}
+	OPERATION_FUNCTION_PATTERN(*)
 }
 
 void			Machine::div()
 {
-	if (_operands.size() < 2)
-		throw Machine::Error("The stack is composed of strictly less that two values when an arithmetic instruction is executed");
-	try
-	{
-		auto i = _operands.size();
-		auto first = _operands.at(i - 2).get();
-		auto second = _operands.at(i - 1).get();
-		operandPtr result(*first / *second);
-		_operands.pop_back();
-		_operands.pop_back();
-		_operands.push_back(std::move(result));
-	}
-	catch (std::exception &e)
-	{
-			std::cout << "ERROR: " << e.what() << std::endl;
-	}
+	OPERATION_FUNCTION_PATTERN(/)
 }
 
 void			Machine::mod()
 {
-	if (_operands.size() < 2)
-		throw Machine::Error("The stack is composed of strictly less that two values when an arithmetic instruction is executed");
-	try
-	{
-		auto i = _operands.size();
-		auto first = _operands.at(i - 2).get();
-		auto second = _operands.at(i - 1).get();
-		operandPtr result(*first % *second);
-		_operands.pop_back();
-		_operands.pop_back();
-		_operands.push_back(std::move(result));
-	}
-	catch (std::exception &e)
-	{
-			std::cout << "ERROR: " << e.what() << std::endl;
-	}
+	OPERATION_FUNCTION_PATTERN(%)
 }
 
 void			Machine::print()
@@ -270,8 +219,6 @@ void			Machine::print()
 		throw Machine::Error("Instruction print on no 8-bit integer");
 	std::cout << static_cast<char>(std::stoi(_operands.back()->toString())) << std::endl;
 }
-
-/********************************************************************/
 
 IOperand *		Machine::createOperand(eOperandType type, const std::string & value)
 {
@@ -307,77 +254,28 @@ IOperand *		Machine::createOperand(eOperandType type, const std::string & value)
 
 IOperand *		Machine::createInt8(const std::string & value)
 {
-	IOperand *new_element = NULL;
-	try
-	{
-		new_element = new Operand(INT8, value);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << "ERROR: " << e.what() << std::endl;
-	}
-	return(new_element);
+	CREATE_OPERAND_PATTERN(INT8)
 }
 
 IOperand *		Machine::createInt16(const std::string & value)
 {
-	IOperand *new_element = NULL;
-	try
-	{
-		new_element = new Operand(INT16, value);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << "ERROR: " << e.what() << std::endl;
-	}
-	return(new_element);
+	CREATE_OPERAND_PATTERN(INT16)
 }
 
 IOperand *		Machine::createInt32(const std::string & value)
 {
-	IOperand *new_element = NULL;
-	try
-	{
-		new_element = new Operand(INT32, value);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << "ERROR: " << e.what() << std::endl;
-	}
-	return(new_element);
+	CREATE_OPERAND_PATTERN(INT32)
 }
 
 IOperand *		Machine::createFloat(const std::string & value)
 {
-	IOperand *new_element = NULL;
-	try
-	{
-		new_element = new Operand(FLOAT, value);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << "ERROR: " << e.what() << std::endl;
-	}
-	return(new_element);
+	CREATE_OPERAND_PATTERN(FLOAT)
 }
 
 IOperand *		Machine::createDouble(const std::string & value)
 {
-	IOperand *new_element = NULL;
-	try
-	{
-		new_element = new Operand(DOUBLE, value);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << "ERROR: " << e.what() << std::endl;
-	}
-	return(new_element);
+	CREATE_OPERAND_PATTERN(DOUBLE)
 }
-
- 
-
-/********************************************************************/
 
 std::ostream &			operator<<(std::ostream &os, Machine const & ref)
 {
