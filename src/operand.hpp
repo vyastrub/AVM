@@ -52,7 +52,6 @@ private:
 	std::string		_value_str;
 	int				_precision;
 	eOperandType	_type;
-
 };
 
 std::ostream &		operator<<(std::ostream & os, Operand const & ref);

@@ -60,7 +60,10 @@ std::string 		Machine::get_command() const
 	return _command;
 }
 
-Machine::Error::Error(std::string what) :_what{what} {}
+Machine::Error::Error(std::string what) 
+{
+	_what = what;
+}
 
 std::string	Machine::Error::get_error() const
 {
@@ -74,16 +77,17 @@ char const * Machine::Error::what() const throw()
 
 Machine::Machine()
 {
-	_singleCallOption = {{"pop", &Machine::pop},
-						{"dump", &Machine::dump},
-						{"add", &Machine::add},
-						{"sub", &Machine::sub}, 
-						{"mul", &Machine::mul},
-						{"div", &Machine::div},
-						{"mod", &Machine::mod},
-						{"print", &Machine::print}};
+	_singleCallOption.emplace("pop", &Machine::pop);
+	_singleCallOption.emplace("dump", &Machine::dump);
+	_singleCallOption.emplace("add", &Machine::add);
+	_singleCallOption.emplace("sub", &Machine::sub);
+	_singleCallOption.emplace("mul", &Machine::mul);
+	_singleCallOption.emplace("div", &Machine::div);
+	_singleCallOption.emplace("mod", &Machine::mod);
+	_singleCallOption.emplace("print", &Machine::print);
 
-	_doubleCallOption = {{"push", &Machine::push}, {"assert", &Machine::assert}};
+	_doubleCallOption.emplace("push", &Machine::push); 
+	_doubleCallOption.emplace("assert", &Machine::assert);
 }
 
 void	Machine::run(std::string command)
@@ -248,8 +252,7 @@ IOperand *		Machine::createOperand(eOperandType type, const std::string & value)
 	}
 	if (new_element == nullptr)
 		throw Machine::Error("Can not create new element");		
-
-  return (new_element);
+	return (new_element);
 }
 
 IOperand *		Machine::createInt8(const std::string & value)
