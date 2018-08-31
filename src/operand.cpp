@@ -218,20 +218,20 @@ IOperand *			Operand::operator%( IOperand const & ref ) const
 	return nullptr;
 }
 
-/********************************************************************/
 
-Operand::Operand(eOperandType type, std::string const & value)
+
+
+Operand::Operand(eOperandType type, std::string const & value) : _type{type}
 {
-	_type = type;
 	switch (_type)
 	{
 		case INT8:
 		{
 			bool		status = true;
-			long long 	rezult;
+			long long 	result;
 			try
 			{
-				rezult = std::stoll(value);
+				result = std::stoll(value);
 			}
 			catch (std::exception &e)
 			{
@@ -240,17 +240,14 @@ Operand::Operand(eOperandType type, std::string const & value)
 			}
 			if (status == true)
 			{
-				if (rezult < SCHAR_MIN)
+				if (result < SCHAR_MIN)
 					throw Operand::Error("Underflow on a value");
-				else if (rezult > SCHAR_MAX)
+				else if (result > SCHAR_MAX)
 					throw Operand::Error("Overflow on a value");
-				else
-				{
-					_precision = 0;
-					std::stringstream ss(std::stringstream::out);
-					ss << std::setprecision(_precision) << rezult;
-					_value_str = ss.str();
-				}
+				_precision = 0;
+				std::stringstream ss(std::stringstream::out);
+				ss << std::setprecision(_precision) << result;
+				_value_str = ss.str();
 			}
 			else
 				throw Operand::Error("Operand not found");
@@ -260,10 +257,10 @@ Operand::Operand(eOperandType type, std::string const & value)
 		case INT16:
 		{
 			bool		status = true;
-			long long	rezult;
+			long long	result;
 			try
 			{
-				rezult = std::stoll(value);
+				result = std::stoll(value);
 			}
 			catch (std::exception &e)
 			{
@@ -272,17 +269,14 @@ Operand::Operand(eOperandType type, std::string const & value)
 			}
 			if (status == true)
 			{
-				if (rezult < SHRT_MIN)
+				if (result < SHRT_MIN)
 					throw Operand::Error("Underflow on a value");
-				else if (rezult > SHRT_MAX)
+				else if (result > SHRT_MAX)
 					throw Operand::Error("Overflow on a value");
-				else
-				{
-					_precision = 0;
-					std::stringstream ss(std::stringstream::out);
-					ss << std::setprecision(_precision) << rezult;
-					_value_str = ss.str();
-				}
+				_precision = 0;
+				std::stringstream ss(std::stringstream::out);
+				ss << std::setprecision(_precision) << result;
+				_value_str = ss.str();
 			}
 			else
 				throw Operand::Error("Operand not found");
@@ -292,10 +286,10 @@ Operand::Operand(eOperandType type, std::string const & value)
 		case INT32:
 		{
 			bool		status = true;
-			long long	rezult;
+			long long	result;
 			try
 			{
-				rezult = std::stoll(value);
+				result = std::stoll(value);
 			}
 			catch (std::exception &e)
 			{
@@ -304,17 +298,14 @@ Operand::Operand(eOperandType type, std::string const & value)
 			}
 			if (status == true)
 			{
-				if (rezult < INT_MIN)
+				if (result < INT_MIN)
 					throw Operand::Error("Underflow on a value");
-				else if (rezult > INT_MAX)
+				else if (result > INT_MAX)
 					throw Operand::Error("Overflow on a value");
-				else
-				{
-					_precision = 0;
-					std::stringstream ss(std::stringstream::out);
-					ss << std::setprecision(_precision) << rezult;
-					_value_str = ss.str();
-				}
+				_precision = 0;
+				std::stringstream ss(std::stringstream::out);
+				ss << std::setprecision(_precision) << result;
+				_value_str = ss.str();
 			}
 			else
 				throw Operand::Error("Operand not found");
@@ -340,13 +331,10 @@ Operand::Operand(eOperandType type, std::string const & value)
 					throw Operand::Error("Underflow on a value");
 				else if (rezult > FLT_MAX)
 					throw Operand::Error("Overflow on a value");
-				else
-				{
 					_precision = FLT_DIG;
-					std::stringstream ss(std::stringstream::out);
-					ss << std::setprecision(_precision) << rezult;
-					_value_str = ss.str();
-				}
+				std::stringstream ss(std::stringstream::out);
+				ss << std::setprecision(_precision) << rezult;
+				_value_str = ss.str();
 			}
 			else
 				throw Operand::Error("Operand not found");
@@ -372,22 +360,18 @@ Operand::Operand(eOperandType type, std::string const & value)
 					throw Operand::Error("Underflow on a value");
 				else if (rezult > DBL_MAX)
 					throw Operand::Error("Overflow on a value");
-				else
-				{
-					_precision = DBL_DIG;
-					std::stringstream ss(std::stringstream::out);
-					ss << std::setprecision(_precision) << rezult;
-					_value_str = ss.str();
-				}
+				_precision = DBL_DIG;
+				std::stringstream ss(std::stringstream::out);
+				ss << std::setprecision(_precision) << rezult;
+				_value_str = ss.str();
 			}
 			else
 				throw Operand::Error("Operand not found");
 		}
 		break;
 	}
+	//std::function fun = std::sto
 }
-
-/********************************************************************/
 
 int 				Operand::getPrecision() const
 {
@@ -403,8 +387,6 @@ std::string const &	Operand::toString() const
 {
 	return _value_str;	
 }
-
-/********************************************************************/
 
 std::ostream &	operator<<(std::ostream &os, Operand const & ref)
 {
