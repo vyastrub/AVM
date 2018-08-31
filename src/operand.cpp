@@ -1,11 +1,85 @@
 #include "operand.hpp"
 #include <climits>
-/********************************************************************/
 
-Operand::Error::Error(std::string what)
-{
-	_what = what;
-}
+#define OPERATION_PATTERN(operation)  													\
+	eOperandType type;																	\
+	if(_type >= ref.getType())															\
+		type = _type;																	\
+	else																				\
+		type = ref.getType();															\
+																						\
+	int precision;																		\
+	if (_precision >= ref.getPrecision())												\
+		precision = _precision;															\
+	else																				\
+		precision = ref.getPrecision();													\
+																						\
+	switch (type)																		\
+	{																					\
+		case INT8:																		\
+		{																				\
+			auto rezult = std::stoll(_value_str) operation std::stoll(ref.toString());	\
+			if (rezult < SCHAR_MIN)														\
+				throw Operand::Error("Underflow name on a rezult");						\
+			else if (rezult > SCHAR_MAX)												\
+				throw Operand::Error("Overflow name on a rezult");						\
+			std::stringstream ss (std::stringstream::out);								\
+			ss << rezult;																\
+			return (new Operand(INT8, ss.str()));										\
+		}																				\
+																						\
+		case INT16:																		\
+		{																				\
+			auto rezult = std::stoll(_value_str) operation std::stoll(ref.toString());	\
+			if (rezult < SHRT_MIN)														\
+				throw Operand::Error("Underflow  name on a rezult"); 					\
+			else if (rezult > SHRT_MAX)													\
+				throw Operand::Error("Overflow name on a rezult");						\
+			std::stringstream ss (std::stringstream::out);								\
+			ss << rezult;																\
+			return (new Operand(INT16, ss.str()));										\
+		}																				\
+																						\
+		case INT32:																		\
+		{																				\
+			auto rezult = std::stoll(_value_str) operation std::stoll(ref.toString());	\
+			if (rezult < INT_MIN)														\
+				throw Operand::Error("Underflow name on a rezult");						\
+			else if (rezult > INT_MAX)													\
+				throw Operand::Error("Overflow name on a rezult");						\
+			std::stringstream ss (std::stringstream::out);								\
+			ss << rezult;																\
+			return (new Operand(INT32, ss.str()));										\
+		}																				\
+																						\
+		case FLOAT:																		\
+		{																				\
+			auto rezult = std::stold(_value_str) operation std::stold(ref.toString());	\
+			if (rezult < -FLT_MIN)														\
+				throw Operand::Error("Underflow name on a rezult");						\
+			else if (rezult > FLT_MAX)													\
+				throw Operand::Error("Overflow name on a rezult");						\
+			std::stringstream ss (std::stringstream::out);								\
+			ss << std::setprecision(precision) << rezult;								\
+			return (new Operand(FLOAT, ss.str()));										\
+		}																				\
+																						\
+		case DOUBLE:																	\
+		{																				\
+			auto rezult = std::stold(_value_str) operation std::stold(ref.toString());	\
+			if (rezult < -DBL_MAX)														\
+				throw Operand::Error("Underflow name on a rezult");						\
+			else if (rezult > DBL_MAX)													\
+				throw Operand::Error("Overflow name on a rezult");						\
+			std::stringstream ss (std::stringstream::out);								\
+			ss << std::setprecision(precision) << rezult;								\
+			return (new Operand(DOUBLE, ss.str()));										\
+		}																				\
+	}																					\
+	return nullptr;
+
+
+Operand::Error::Error(std::string what) :_what {what} {}
 
 std::string	Operand::Error::get_error() const
 {
@@ -17,408 +91,27 @@ char const* Operand::Error::what() const throw()
 	return _what.c_str();
 }
 
-/********************************************************************/
-
 IOperand *	Operand::operator+( IOperand const & ref ) const
 {
-	eOperandType type;
-	if(_type >= ref.getType())
-		type = _type;
-	else
-		type = ref.getType();
-
-	int precision;
-	if (_precision >= ref.getPrecision())
-		precision = _precision;
-	else
-		precision = ref.getPrecision();
-
-	switch (type)
-	{
-		case INT8:
-		{
-			auto rezult = std::stoll(_value_str) + std::stoll(ref.toString());
-			if (rezult < SCHAR_MIN)
-				throw Operand::Error("Underflow add on a rezult");
-			else if (rezult > SCHAR_MAX)
-				throw Operand::Error("Overflow add on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT8, ss.str()));
-			}
-		}
-		break;
-		
-		case INT16:
-		{
-			auto rezult = std::stoll(_value_str) + std::stoll(ref.toString());
-			if (rezult < SHRT_MIN)
-				throw Operand::Error("Underflow add on a rezult");
-			else if (rezult > SHRT_MAX)
-				throw Operand::Error("Overflow add on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT16, ss.str()));
-			}
-		}
-		break;
-
-		case INT32:
-		{
-			auto rezult = std::stoll(_value_str) + std::stoll(ref.toString());
-			if (rezult < INT_MIN)
-				throw Operand::Error("Underflow add on a rezult");
-			else if (rezult > INT_MAX)
-				throw Operand::Error("Overflow add on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT32, ss.str()));
-			}
-		}
-		break;
-
-		case FLOAT:
-		{
-			auto rezult = std::stold(_value_str) + std::stold(ref.toString());
-			if (rezult < -FLT_MIN)
-				throw Operand::Error("Underflow add on a rezult");
-			else if (rezult > FLT_MAX)
-				throw Operand::Error("Overflow add on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << std::setprecision(precision) << rezult;
-				return (new Operand(FLOAT, ss.str()));
-			}
-		}
-		break;
-		
-		case DOUBLE:
-		{
-			auto rezult = std::stold(_value_str) + std::stold(ref.toString());
-			if (rezult < -DBL_MAX)
-				throw Operand::Error("Underflow add on a rezult");
-			else if (rezult > DBL_MAX)
-				throw Operand::Error("Overflow add on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << std::setprecision(precision) << rezult;
-				return (new Operand(DOUBLE, ss.str()));
-			}
-		}
-		break;
-	}
-	return nullptr;
+	OPERATION_PATTERN(+)
 }
 
 IOperand *			Operand::operator-( IOperand const & ref ) const
 {
-	eOperandType type;
-	if(_type >= ref.getType())
-		type = _type;
-	else
-		type = ref.getType();
-
-	int precision;
-	if (_precision >= ref.getPrecision())
-		precision = _precision;
-	else
-		precision = ref.getPrecision();
-
-
-	switch (type)
-	{
-		case INT8:
-		{
-			auto rezult = std::stoll(_value_str) - std::stoll(ref.toString());
-			if (rezult < SCHAR_MIN)
-				throw Operand::Error("Underflow sub on a rezult");
-			else if (rezult > SCHAR_MAX)
-				throw Operand::Error("Overflow sub on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT8, ss.str()));
-			}
-		}
-		break;
-		
-		case INT16:
-		{
-			auto rezult = std::stoll(_value_str) - std::stoll(ref.toString());
-			if (rezult < SHRT_MIN)
-				throw Operand::Error("Underflow sub on a rezult");
-			else if (rezult > SHRT_MAX)
-				throw Operand::Error("Overflow sub on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT16, ss.str()));
-			}
-		}
-		break;
-
-		case INT32:
-		{
-			auto rezult = std::stoll(_value_str) - std::stoll(ref.toString());
-			if (rezult < INT_MIN)
-				throw Operand::Error("Underflow sub on a rezult");
-			else if (rezult > INT_MAX)
-				throw Operand::Error("Overflow sub on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT32, ss.str()));
-			}
-		}
-		break;
-
-		case FLOAT:
-		{
-			auto rezult = std::stold(_value_str) - std::stold(ref.toString());
-			if (rezult < -FLT_MIN)
-				throw Operand::Error("Underflow sub on a rezult");
-			else if (rezult > FLT_MAX)
-				throw Operand::Error("Overflow sub on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << std::setprecision(precision) << rezult;
-				return (new Operand(FLOAT, ss.str()));
-			}
-		}
-		break;
-		
-		case DOUBLE:
-		{
-			auto rezult = std::stold(_value_str) - std::stold(ref.toString());
-			if (rezult < -DBL_MAX)
-				throw Operand::Error("Underflow sub on a rezult");
-			else if (rezult > DBL_MAX)
-				throw Operand::Error("Overflow sub on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << std::setprecision(precision) << rezult;
-				return (new Operand(DOUBLE, ss.str()));
-			}
-		}
-		break;
-	}
-	return nullptr;
+	OPERATION_PATTERN(-)
 }
 
 IOperand *			Operand::operator*( IOperand const & ref ) const
 {
-	eOperandType type;
-	if (_type >= ref.getType())
-		type = _type;
-	else
-		type = ref.getType();
-
-	int precision;
-	if (_precision >= ref.getPrecision())
-		precision = _precision;
-	else
-		precision = ref.getPrecision();
-
-	switch (type)
-	{
-		case INT8:
-		{
-			auto rezult = std::stoll(_value_str) * std::stoll(ref.toString());
-			if (rezult < SCHAR_MIN)
-				throw Operand::Error("Underflow mul on a rezult");
-			else if (rezult > SCHAR_MAX)
-				throw Operand::Error("Overflow mul on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT8, ss.str()));
-			}
-		}
-		break;
-		
-		case INT16:
-		{
-			auto rezult = std::stoll(_value_str) * std::stoll(ref.toString());
-			if (rezult < SHRT_MIN)
-				throw Operand::Error("Underflow mul on a rezult");
-			else if (rezult > SHRT_MAX)
-				throw Operand::Error("Overflow mul on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT16, ss.str()));
-			}
-		}
-		break;
-
-		case INT32:
-		{
-			auto rezult = std::stoll(_value_str) * std::stoll(ref.toString());
-			if (rezult < INT_MIN)
-				throw Operand::Error("Underflow mul on a rezult");
-			else if (rezult > INT_MAX)
-				throw Operand::Error("Overflow mul on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << rezult;
-				return (new Operand(INT32, ss.str()));
-			}
-		}
-		break;
-
-		case FLOAT:
-		{
-			auto rezult = std::stold(_value_str) * std::stold(ref.toString());
-			if (rezult < -FLT_MIN)
-				throw Operand::Error("Underflow mul on a rezult");
-			else if (rezult > FLT_MAX)
-				throw Operand::Error("Overflow mul on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << std::setprecision(precision) << rezult;
-				return (new Operand(FLOAT, ss.str()));
-			}
-		}
-		break;
-		
-		case DOUBLE:
-		{
-			auto rezult = std::stold(_value_str) * std::stold(ref.toString());
-			if (rezult < -DBL_MAX)
-				throw Operand::Error("Underflow mul on a rezult");
-			else if (rezult > DBL_MAX)
-				throw Operand::Error("Overflow mul on a rezult");
-			else
-			{
-				std::stringstream ss (std::stringstream::out);
-				ss << std::setprecision(precision) << rezult;
-				return (new Operand(DOUBLE, ss.str()));
-			}
-		}
-		break;
-	}
-	return nullptr;
+	OPERATION_PATTERN(*)
 }
 
 IOperand *			Operand::operator/( IOperand const & ref ) const
 {
-	eOperandType type;
-	if (_type >= ref.getType())
-		type = _type;
-	else
-		type = ref.getType();
-
-	int precision;
-	if (_precision >= ref.getPrecision())
-		precision = _precision;
-	else
-		precision = ref.getPrecision();
-
 	if (std::stold(ref.toString()) == 0)
 		throw Operand::Error("Div by zero!");
-	else
-	{
-		switch (type)
-		{
-			case INT8:
-			{
-				auto rezult = std::stoll(_value_str) / std::stoll(ref.toString());
-				if (rezult < SCHAR_MIN)
-					throw Operand::Error("Underflow div on a rezult");
-				else if (rezult > SCHAR_MAX)
-					throw Operand::Error("Overflow div on a rezult");
-				else
-				{
-					std::stringstream ss (std::stringstream::out);
-					ss << rezult;
-					return (new Operand(INT8, ss.str()));
-				}
-			}
-			break;
-			
-			case INT16:
-			{
-				auto rezult = std::stoll(_value_str) / std::stoll(ref.toString());
-				if (rezult < SHRT_MIN)
-					throw Operand::Error("Underflow div on a rezult");
-				else if (rezult > SHRT_MAX)
-					throw Operand::Error("Overflow div on a rezult");
-				else
-				{
-					std::stringstream ss (std::stringstream::out);
-					ss << rezult;
-					return (new Operand(INT16, ss.str()));
-				}
-			}
-			break;
 
-			case INT32:
-			{
-				auto rezult = std::stoll(_value_str) / std::stoll(ref.toString());
-				if (rezult < INT_MIN)
-					throw Operand::Error("Underflow div on a rezult");
-				else if (rezult > INT_MAX)
-					throw Operand::Error("Overflow div on a rezult");
-				else
-				{
-					std::stringstream ss (std::stringstream::out);
-					ss << rezult;
-					return (new Operand(INT32, ss.str()));
-				}
-			}
-			break;
-
-			case FLOAT:
-			{
-				auto rezult = std::stold(_value_str) / std::stold(ref.toString());
-				if (rezult < -FLT_MIN)
-					throw Operand::Error("Underflow div on a rezult");
-				else if (rezult > FLT_MAX)
-					throw Operand::Error("Overflow div on a rezult");
-				else
-				{
-					std::stringstream ss (std::stringstream::out);
-					ss << std::setprecision(precision) << rezult;
-					return (new Operand(FLOAT, ss.str()));
-				}
-			}
-			break;
-		
-			case DOUBLE:
-			{
-				auto rezult = std::stold(_value_str) / std::stold(ref.toString());
-				if (rezult < -DBL_MAX)
-					throw Operand::Error("Underflow div on a rezult");
-				else if (rezult > DBL_MAX)
-					throw Operand::Error("Overflow div on a rezult");
-				else
-				{
-					std::stringstream ss (std::stringstream::out);
-					ss << std::setprecision(precision) << rezult;
-					return (new Operand(DOUBLE, ss.str()));
-				}
-			}
-			break;
-		}
-	}
-	return nullptr;
+	OPERATION_PATTERN(/)
 }
 
 IOperand *			Operand::operator%( IOperand const & ref ) const

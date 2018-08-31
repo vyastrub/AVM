@@ -20,7 +20,7 @@
 	}
 
 #define CREATE_OPERAND_PATTERN(type)   					 \
-	IOperand *new_element = NULL;						 \
+	IOperand *new_element = nullptr;					 \
 	try													 \
 	{													 \
 		new_element = new Operand(type, value);		 	 \
@@ -222,7 +222,7 @@ void			Machine::print()
 
 IOperand *		Machine::createOperand(eOperandType type, const std::string & value)
 {
-	IOperand *new_element = NULL;
+	IOperand *new_element = nullptr;
 
 	switch (type)
 	{
@@ -246,7 +246,7 @@ IOperand *		Machine::createOperand(eOperandType type, const std::string & value)
 		new_element = createDouble(value);
 		break;
 	}
-	if (new_element == NULL)
+	if (new_element == nullptr)
 		throw Machine::Error("Can not create new element");		
 
   return (new_element);
