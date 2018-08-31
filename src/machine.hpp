@@ -1,16 +1,19 @@
 #pragma once
 #include <vector>
+#include <map>
 #include "operand.hpp"
 #include "type.hpp"
 
+class Machine;
 typedef std::unique_ptr<IOperand> operandPtr;
+typedef std::map<std::string, void(Machine::*)()> singleFunctionMap_mt;
+typedef std::map<std::string, void(Machine::*)(std::string)> doubleFunctionMap_mt;
 
-class Machine 
+class Machine
 {
-
 public:
 
-	Machine() = default;
+	Machine();
 	Machine(Machine const &ref) = delete;
 	~Machine() = default;
 	Machine &	operator=(Machine const &ref) = delete;
@@ -49,6 +52,9 @@ private:
 	bool						_exit;
 	std::string					_command;
 	std::vector<operandPtr>		_operands;
+
+	singleFunctionMap_mt _singleCallOption;
+	doubleFunctionMap_mt _doubleCallOption;
 
 	IOperand *	createOperand(eOperandType type, const std::string & value);
 	IOperand *	createInt8(const std::string &);

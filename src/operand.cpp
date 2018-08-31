@@ -1,5 +1,5 @@
 #include "operand.hpp"
-
+#include <climits>
 /********************************************************************/
 
 Operand::Error::Error(std::string what)
@@ -12,7 +12,7 @@ std::string	Operand::Error::get_error() const
 	return _what;
 }
 
-char const* Operand::Error::what() const
+char const* Operand::Error::what() const throw()
 {
 	return _what.c_str();
 }

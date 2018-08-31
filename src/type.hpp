@@ -24,20 +24,18 @@ public:
 		Error() = default;;
 		Error(std::string what);
 		 Error(Error const &ref) = default;
-		 ~Error() = default;;
-	
-		std::string				get_error() const;
-		Error &					operator=(Error const &ref) = default;
-	
+		 ~Error() = default;
+		std::string		get_error() const;
+		Error &			operator=(Error const &ref) = default;
 		char const *	what() const throw();
 	
 	private:
-		std::string		_what;
+		std::string	_what;
 	};
 
 private:
-	std::string		_type;
-	std::string		_value;
+	std::string	_type;
+	std::string	_value;
 
 };
 

@@ -1,18 +1,37 @@
 #include "machine.hpp"
 
-/********************************************************************/
+
+
+namespace {
+
+	std::vector<std::string> ft_split(std::string str) {
+		std::string buf;
+		std::vector<std::string> command;
+
+		for (auto it = str.begin(); it < str.end(); ++it) {
+			if (*it != ' ' && *it != ';')
+				buf.push_back(*it);
+			if (*it == ' ' || it + 1 == str.end()) {
+				if (!buf.empty())
+					command.push_back(buf);
+				buf.clear();
+			}
+			if (*it == ';') {
+				if (!buf.empty())
+					command.push_back(buf);
+				break;
+			}
+		}
+		return std::move(command);
+	}
+}
 
 std::string 		Machine::get_command() const
 {
 	return _command;
 }
 
-/********************************************************************/
-
-Machine::Error::Error(std::string what) {
-	_what = what;
-}
-
+Machine::Error::Error(std::string what) :_what{what} {}
 
 std::string	Machine::Error::get_error() const
 {
@@ -24,162 +43,69 @@ char const * Machine::Error::what() const throw()
 	return _what.c_str();
 }
 
-/********************************************************************/
-
-std::vector<std::string> ft_split(std::string str)
+Machine::Machine()
 {
-	std::string 				buf;
-	std::vector<std::string>	command;
+	_singleCallOption = {{"pop", &Machine::pop},
+						{"dump", &Machine::dump},
+						{"add", &Machine::add},
+						{"sub", &Machine::sub}, 
+						{"mul", &Machine::mul},
+						{"div", &Machine::div},
+						{"mod", &Machine::mod},
+						{"print", &Machine::print}};
 
-	for (auto it = str.begin(); it < str.end(); ++it)
-	{
-		if (*it != ' ' && *it != ';')
-			buf.push_back(*it);
-		if (*it == ' ' || it + 1 == str.end())
-		{
-			if (!buf.empty())
-				command.push_back(buf);
-			buf.clear();
-		}
-		if (*it == ';')
-		{
-			if (!buf.empty())
-				command.push_back(buf);
-			break;
-		}
-	}
-
-	return std::move(command);
+	_doubleCallOption = {{"push", &Machine::push}, {"assert", &Machine::assert}};
 }
 
 void	Machine::run(std::string command)
 {
 	if (_exit)
-		throw Machine::Error("VM has closed");
-	else
 	{
-		_command = command;
-		std::vector<std::string> split_command = ft_split(command);
-
-		if (split_command.size() == 0)
-		{
-//			std::cout << "commentar in front" << std::endl;
-		}
-		else if (split_command[0] == "push" && split_command.size() == 2)
-		{
-			try
-			{
-				push(split_command[1]);
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "pop" && split_command.size() == 1)
-		{
-			try
-			{
-				pop();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "dump" && split_command.size() == 1)
-		{
-			try
-			{
-				dump();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "assert" && split_command.size() == 2)
-		{
-			try
-			{
-				assert(split_command[1]);
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "add" && split_command.size() == 1)
-		{	
-			try
-			{
-				add();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "sub" && split_command.size() == 1)
-		{	
-			try
-			{
-				sub();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "mul" && split_command.size() == 1)
-		{	
-			try
-			{
-				mul();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "div" && split_command.size() == 1)
-		{	
-			try
-			{
-				div();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "mod" && split_command.size() == 1)
-		{	
-			try
-			{
-				mod();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "print" && split_command.size() == 1)
-		{
-			try
-			{
-				print();
-			}
-			catch (std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-			}
-		}
-		else if (split_command[0] == "exit" && split_command.size() == 1)
-			_exit = true;
-		else
-			throw Machine::Error("!" + command + "!:" + "An instruction is unknown");
+		std::cout << "VM has closed" << std::endl;
+		exit(0);
 	}
+
+	_command = command;
+	std::vector<std::string> split_command = ft_split(command);
+
+	if (split_command.size() == 0)
+	{
+		return;
+	}
+	for (auto i = _doubleCallOption.begin(); i != _doubleCallOption.end(); ++i)
+	{
+		if (split_command[0] == i->first && split_command.size() == 2)
+		{
+			try
+			{
+				i->second()(split_command[1]);
+			}
+			catch (std::exception &e)
+			{
+				std::cout << "ERROR: " << e.what() << std::endl;
+			}
+			return;
+		}
+	}
+	for (auto i = _singleCallOption.begin(); i != _singleCallOption.end(); ++i)
+	{
+		if (split_command[0] == i->first && split_command.size() == 1)
+		{
+			try
+			{
+				i->second();
+ 			}
+			catch (std::exception &e)
+			{
+				std::cout << "ERROR: " << e.what() << std::endl;
+			}
+			return;
+		}
+	}
+	if (split_command[0] == "exit" && split_command.size() == 1)
+		_exit = true;
+	else
+		throw Machine::Error("!" + command + "!:" + "An instruction is unknown");
 }
 
 /********************************************************************/

@@ -1,17 +1,12 @@
 #include "avm.hpp"
 #include "machine.hpp"
 
-/********************************************************************/
-
 std::string	Avm::get_status() const
 {
 	return _status_read;
 }
 
-/***********************************s*********************************/
-
 Avm::Error::Error(std::string what) : _what(what) {}
-
 
 std::string	Avm::Error::get_error() const
 {
@@ -22,8 +17,6 @@ char const * Avm::Error::what() const throw()
 {
 	return _what.c_str();
 }
-
-/********************************************************************/
 
 void 	Avm::read_file(std::string file_name)
 {
@@ -53,7 +46,8 @@ void 	Avm::read_file(std::string file_name)
 		}
 		file.close();
 		if (number_error != 0)
-			throw Avm::Error("The assembly program includes one or several lexical errors or syntactic errors or input after exit");
+			throw Avm::Error("The assembly program includes " + std::to_string(number_error)
+							 + " lexical or syntactic errors or input after exit");
 	}
 	else
 		throw Avm::Error("File not found");
@@ -84,8 +78,6 @@ void 		Avm::read_terminal()
 	if (number_error != 0)
 		throw Avm::Error("The assembly program includes one or several lexical errors or syntactic errors or input after exit");
 }
-
-/********************************************************************/
 
 std::ostream &			operator<<(std::ostream &os, Avm const & ref)
 {
