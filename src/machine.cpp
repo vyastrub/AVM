@@ -1,35 +1,5 @@
 #include "machine.hpp"
-
-#define OPERATION_FUNCTION_PATTERN(operation) 									\
-	if (_operands.size() < 2)		    										\
-		throw Machine::Error("The stack is composed of strictly	less that two " \
-					   "values when an arithmetic instruction is executed");	\
-	try																			\
-	{																			\
-		auto i = _operands.size();												\
-		auto first = _operands.at(i - 2).get();									\
-		auto second = _operands.at(i - 1).get();								\
-		operandPtr result(*first operation *second);							\
-		_operands.pop_back();													\
-		_operands.pop_back();													\
-		_operands.push_back(std::move(result)); 								\
-	}																			\
-	catch (std::exception &e)													\
-	{																			\
-			std::cout << "ERROR: " << e.what() << std::endl;					\
-	}
-
-#define CREATE_OPERAND_PATTERN(type)   					 \
-	IOperand *new_element = nullptr;					 \
-	try													 \
-	{													 \
-		new_element = new Operand(type, value);		 	 \
-	}													 \
-	catch (std::exception &e)							 \
-	{													 \
-		std::cout << "ERROR: " << e.what() << std::endl; \
-	}													 \
-	return(new_element);
+#include "definedFunctions.hpp"
 
 namespace
 {
@@ -60,7 +30,7 @@ std::string 		Machine::get_command() const
 	return _command;
 }
 
-Machine::Error::Error(std::string what) 
+Machine::Error::Error(std::string what)
 {
 	_what = what;
 }
@@ -86,7 +56,7 @@ Machine::Machine()
 	_singleCallOption.emplace("mod", &Machine::mod);
 	_singleCallOption.emplace("print", &Machine::print);
 
-	_doubleCallOption.emplace("push", &Machine::push); 
+	_doubleCallOption.emplace("push", &Machine::push);
 	_doubleCallOption.emplace("assert", &Machine::assert);
 }
 
@@ -252,7 +222,8 @@ IOperand *		Machine::createOperand(eOperandType type, const std::string & value)
 	}
 	if (new_element == nullptr)
 		throw Machine::Error("Can not create new element");		
-	return (new_element);
+
+  return (new_element);
 }
 
 IOperand *		Machine::createInt8(const std::string & value)

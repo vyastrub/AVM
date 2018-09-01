@@ -18,9 +18,9 @@ char const * Avm::Error::what() const throw()
 	return _what.c_str();
 }
 
-void 	Avm::read_file(std::string file_name)
+void 	Avm::read_file(char const* file_name)
 {
-	std::ifstream	file(file_name.c_str(), std::ios::in);
+	std::ifstream	file(file_name, std::ios::in);
 	std::string		command;
 	size_t			number_error = 0;
 

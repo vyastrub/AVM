@@ -15,22 +15,22 @@ public:
 	Avm & operator=(const Avm &) = default;
 
 	std::string	get_status() const;
-	void	read_file(std::string file_name);
+	void	read_file(char const* file_name);
 	void	read_terminal();
 
-	class 		Error: public std::exception
+	class Error: public std::exception
 	{
 	public:
 		Error() = default;
 		~Error() = default;
 		Error(const Error &) = default;
 		Error(std::string what);
-		Error &			operator=(const Error &) = default;
-		std::string		get_error() const;
-		char const * 	what() const throw();
+		Error &		operator=(const Error &) = default;
+		std::string	get_error() const;
+		char const* what() const throw();
 	
 	private:
-		std::string		_what;
+		std::string	_what;
 	};
 
 private:
