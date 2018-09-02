@@ -6,17 +6,17 @@ namespace
 	static const std::vector<std::string> types = {"int8", "int16", "int32", "float", "double"};
 }
 
-std::string	 Type::get_type() const
+std::string	 Type::getType() const
 {
 	return _type;
 }
 
-std::string	 Type::get_value() const
+std::string	 Type::getValue() const
 {
 	return _value;
 }
 
-eOperandType Type::get_enum_type() const
+eOperandType Type::getEnumType() const
 {
 	for (size_t i{}; i < types.size(); ++i)
 		if (_type.compare(types[i]) == 0)
@@ -26,23 +26,18 @@ eOperandType Type::get_enum_type() const
 
 Type::Error::Error(std::string what) : _what(what) {}
 
-std::string	Type::Error::get_error() const
-{
-	return _what;
-}
-
 char const* Type::Error::what() const throw()
 {
 	return _what.c_str();
 }
 
-void	Type::set_param(std::string command)
+void	Type::setParam(std::string command)
 {
-	set_type(command);
-	set_value(command);
+	setType(command);
+	setValue(command);
 }
 
-void	Type::set_type(std::string & type)
+void	Type::setType(std::string & type)
 {
 	for (auto i = types.begin(); i < types.end(); ++i)
 		if (type.compare(0, (*i).size(), *i) == 0)
@@ -54,7 +49,7 @@ void	Type::set_type(std::string & type)
 	throw Type::Error("!" + type + "!:" + "Unknown type");
 }
 
-void	Type::set_value(std::string  & value)
+void	Type::setValue(std::string  & value)
 {
 	if (value.front() != '(' || value.back() != ')')
 	{
@@ -99,12 +94,12 @@ void	Type::set_value(std::string  & value)
 
 std::ostream &	operator<<(std::ostream &os, Type const & ref)
 {
-	os << ref.get_type() << ":" << ref.get_value();
+	os << ref.getType() << ":" << ref.getValue();
 	return os;
 }
 
 std::ostream &	operator<<(std::ostream &os, Type::Error const & ref)
 {
-	os << ref.get_error();
+	os << ref.what();
 	return os;
 }

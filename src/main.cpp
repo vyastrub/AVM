@@ -1,4 +1,4 @@
-#include "avm.hpp"
+#include "read.hpp"
 
 int		main(int ac, char* av[])
 {
@@ -7,13 +7,13 @@ int		main(int ac, char* av[])
 		std::cout << "Usage: ./avm or ./avm <file>" << std::endl;
 		return 0;
 	}
-	Avm avm;
+	Read avm;
 	try
 	{
 		if (ac == 2)
-			avm.read_file(av[1]);
+			avm.readFromFile(av[1]);
 		else
-			avm.read_terminal();
+			avm.readFromTerminal();
 	}
 	catch (std::exception& e)
 	{

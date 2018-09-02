@@ -1,28 +1,26 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <map>
 #include "operand.hpp"
 #include "type.hpp"
 
-class Machine;
+class Session;
 typedef std::unique_ptr<IOperand> operandPtr;
-typedef void(Machine::*fPtr)();
-typedef std::map<std::string, fPtr> singleFunctionMap_mt;
-//typedef std::map<std::string, void(Machine::*)()> singleFunctionMap_mt;
-typedef std::map<std::string, void(Machine::*)(std::string)> doubleFunctionMap_mt;
+typedef std::map<std::string, void(Session::*)()> singleFunctionMap_mt;
+typedef std::map<std::string, void(Session::*)(std::string)> doubleFunctionMap_mt;
+typedef std::vector<IOperand*(Session::*)(const std::string &)> operandFactoryMap_vt;
 
-class Machine
+class Session
 {
 public:
 
-	Machine();
-	Machine(Machine const &ref) = delete;
-	~Machine() = default;
-	Machine &	operator=(Machine const &ref) = delete;
-
-	std::string	get_command() const;
-
-	void run(std::string command);
+	Session();
+	Session(Session const &ref) = delete;
+	~Session() = default;
+	Session & operator=(Session const &ref) = delete;
+	std::string	getCommand() const;
+	void run(std::string && command);
 	void push(std::string command);
 	void pop();
 	void dump();
@@ -34,8 +32,7 @@ public:
 	void mod();
 	void print();
 
-
-	class 		Error : public std::exception
+	class Error : public std::exception
 	{
 	public:
 		Error() = default;
@@ -43,20 +40,18 @@ public:
 		Error(Error const &) = default;
 		~Error() = default;
 		Error &	operator=(Error const &) = default;
-
-		std::string	get_error() const;
 		char const * what() const throw();
 	private:
 		std::string	_what;
 	};
 
 private:
-	bool						_exit;
-	std::string					_command;
-	std::vector<operandPtr>		_operands;
-
-	singleFunctionMap_mt _singleCallOption;
-	doubleFunctionMap_mt _doubleCallOption;
+	bool					_exit;
+	std::string				_command;
+	std::vector<operandPtr>	_operands;
+	singleFunctionMap_mt	_singleCallOption;
+	doubleFunctionMap_mt	_doubleCallOption;
+	operandFactoryMap_vt	_operandFactoryMap;
 
 	IOperand *	createOperand(eOperandType type, const std::string & value);
 	IOperand *	createInt8(const std::string &);
@@ -66,5 +61,5 @@ private:
 	IOperand *	createDouble(const std::string &);
 };
 
-std::ostream &		operator<<(std::ostream & os, Machine const & ref);
-std::ostream &		operator<<(std::ostream & os, Machine::Error const & ref);
+std::ostream &		operator<<(std::ostream & os, Session const & ref);
+std::ostream &		operator<<(std::ostream & os, Session::Error const & ref);

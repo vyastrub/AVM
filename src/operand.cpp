@@ -1,4 +1,8 @@
 #include <climits>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <memory>
 #include "operand.hpp"
 #include "definedFunctions.hpp"
 
@@ -7,32 +11,27 @@ Operand::Error::Error(std::string what)
 	_what = what;
 }
 
-std::string	Operand::Error::get_error() const
-{
-	return _what;
-}
-
 char const* Operand::Error::what() const throw()
 {
 	return _what.c_str();
 }
 
-IOperand *	Operand::operator+( IOperand const & ref ) const
+IOperand* Operand::operator+( IOperand const & ref ) const
 {
 	OPERATION_PATTERN(+, std::stold(_value_str) + std::stold(ref.toString()))
 }
 
-IOperand *	Operand::operator-( IOperand const & ref ) const
+IOperand* Operand::operator-( IOperand const & ref ) const
 {
 	OPERATION_PATTERN(-, std::stold(_value_str) - std::stold(ref.toString()))
 }
 
-IOperand *	Operand::operator*( IOperand const & ref ) const
+IOperand* Operand::operator*( IOperand const & ref ) const
 {
 	OPERATION_PATTERN(*, std::stold(_value_str) * std::stold(ref.toString()))
 }
 
-IOperand *	Operand::operator/( IOperand const & ref ) const
+IOperand* Operand::operator/( IOperand const & ref ) const
 {
 	if (std::stold(ref.toString()) == 0)
 		throw Operand::Error("Div by zero!");
@@ -40,7 +39,7 @@ IOperand *	Operand::operator/( IOperand const & ref ) const
 	OPERATION_PATTERN(/ , std::stold(_value_str) / std::stold(ref.toString()))
 }
 
-IOperand *	Operand::operator%( IOperand const & ref ) const
+IOperand* Operand::operator%( IOperand const & ref ) const
 {
 	if (std::stold(ref.toString()) == 0)
 		throw Operand::Error("Mod by zero!");
@@ -75,12 +74,12 @@ Operand::Operand(eOperandType type, std::string const & value) : _type{type}
 	}
 }
 
-int 				Operand::getPrecision() const
+int Operand::getPrecision() const
 {
 	return _precision;
 }
 
-eOperandType 		Operand::getType() const
+eOperandType Operand::getType() const
 {
 	return _type;
 }
@@ -98,6 +97,6 @@ std::ostream &	operator<<(std::ostream &os, Operand const & ref)
 
 std::ostream &	operator<<(std::ostream &os, Operand::Error const & ref)
 {
-	os << ref.get_error();
+	os << ref.what();
 	return os;
 }
